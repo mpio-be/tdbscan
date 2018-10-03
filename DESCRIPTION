@@ -1,0 +1,25 @@
+Package: tdbscan
+Title: Track dbscan
+Version: 0.0.1
+Authors@R:
+    person("Mihai", "Valcu", ,"valcu@orn.mpg.de", c("aut", "cre"))
+Description: A dbscan implementation applied to tracks.
+Depends:
+    R (>= 3.5.0),
+    data.table,
+    trajectories,
+    magrittr
+Imports:
+    dbscan,
+    forcats,
+    igraph,
+    sp,
+    magrittr  
+Suggests:
+    ggplot2,
+    roxygen2,
+    testthat
+License: GPL(>= 2)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1

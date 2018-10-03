@@ -1,0 +1,7 @@
+{
+    "folders":[{
+        "name": "package: tdbscan",
+        "path": "./",
+        "folder_exclude_patterns": ["*_cache", "cache", "figure", "*_files", ".Rproj.user"]
+        }]
+}
