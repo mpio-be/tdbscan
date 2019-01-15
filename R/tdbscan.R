@@ -14,12 +14,12 @@
 #'
 # @import trajectories
 #' @importFrom data.table  data.table setnames .N :=
-#' @importFrom magrittr %>%
-#' @importFrom dbscan  frNN
-#' @importFrom igraph  groups graph_from_edgelist  components subgraph.edges E set_edge_attr
-#' @importFrom forcats fct_inorder
-#' @importFrom sp      coordinates is.projected
-#' @importFrom broom   tidy
+#' @importFrom magrittr     %>%
+#' @importFrom dbscan      frNN
+#' @importFrom igraph      groups graph_from_edgelist  components subgraph.edges E set_edge_attr
+#' @importFrom forcats     fct_inorder
+#' @importFrom sp          coordinates is.projected
+#' @importFrom broom       tidy
 #'
 #' @export
 #' @md

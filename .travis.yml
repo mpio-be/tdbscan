@@ -1,0 +1,19 @@
+
+
+language: R
+sudo: required
+warnings_are_errors: true
+
+
+r_packages:
+ - dbscan
+ - forcats
+ - igraph
+ - sp
+ - magrittr
+ - data.table
+ - broom
+ - trajectories
+ - ggplot2
+ - roxygen2
+ - testthat
