@@ -17,8 +17,7 @@ Default is 5 points (see \code{\link[dbscan:dbscan]{dbscan::dbscan()}}  ).}
 
 \item{borderPoints}{Logical; default to FALSE (see \code{\link[dbscan:dbscan]{dbscan::dbscan()}}  ).}
 
-\item{maxLag}{maximum relative temporal lag (see notes). Default to 6.
-When set to \code{maxLag>N} output is the same as for \link[dbscan:dbscan]{dbscan}.}
+\item{maxLag}{maximum relative temporal lag (see notes). Default to 6.}
 
 \item{minTenure}{minimum time difference, in hours, between the last and the first entry a cluster.
 Clusters with  values smaller than minTenure are discarded.}
@@ -27,36 +26,40 @@ Clusters with  values smaller than minTenure are discarded.}
 tdbscan
 }
 \note{
-\strong{TODO}
+When maxLag is set to \code{maxLag>N} output is the same as for \link[dbscan:dbscan]{dbscan}.
 }
 \examples{
-  require(tdbscan)
-  require(sp)
-  require(trajectories)
-  require(ggplot2)
+require(tdbscan)
+require(ggplot2)
+
 # Pectoral Sandpiper
-  data(pesa56511)
-  z = tdbscan(pesa56511, eps =6600, minPts   = 8, maxLag = 6, borderPoints = TRUE )
-  
-  o = cbind(coordinates(pesa56511), z)
-  ggplot(o, aes(longitude/10000,latitude/10000,color = factor(clustID))) +
-   geom_path(aes(color= NULL), col = 'grey', size = .5) + 
-   geom_point( )
+data(pesa56511)
+z = tdbscan(pesa56511, eps =6600, minPts   = 8, maxLag = 6, borderPoints = TRUE )
+
+o = cbind(sp::coordinates(pesa56511), z)
+ggplot(o, aes(longitude/10000,latitude/10000,color = factor(clustID))) +
+geom_path(aes(color= NULL), col = 'grey', size = .5) + 
+geom_point( alpha = .5, size = 2)
+
+
+
+
 
 # toybird 
-  data(toybird)   
-  z = tdbscan(toybird, eps = 500, minPts   = 3, maxLag = 6)
-  z[, .N, clustID]
-  
-  o = cbind(coordinates(toybird), z)[, clustID := factor(clustID)]
-  
-  ggplot(o, aes(coords.x1/100000,coords.x2/100000,color = clustID)) +
-   geom_path(aes(color= NULL), col = 'grey', size = .5) + 
-   geom_point( ) + geom_text((aes(label = id)), hjust = 1.5 ,check_overlap = TRUE)
-  
-  # set min tenure
- z = tdbscan(toybird, eps = 500, minPts = 3, maxLag = 6, minTenure = 5)
- z[, .N, clustID]
+data(toybird)   
+z = tdbscan(toybird, eps = 500, minPts   = 3, maxLag = 6)
 
+o = cbind(sp::coordinates(toybird), z)[, clustID := factor(clustID)]
 
+ggplot(o, aes(coords.x1/100000,coords.x2/100000,color = clustID)) +
+geom_path(aes(color= NULL), col = 'grey', size = .5) + 
+geom_point( ) + geom_text((aes(label = id)), hjust = 1.5 ,check_overlap = TRUE)
+
+# set min tenure
+z = tdbscan(toybird, eps = 500, minPts = 3, maxLag = 6, minTenure = 5)
+z[, .N, clustID]
+o = cbind(sp::coordinates(toybird), z)[, clustID := factor(clustID)]
+ggplot(o, aes(coords.x1/100000,coords.x2/100000,color = clustID)) +
+geom_path(aes(color= NULL), col = 'grey', size = .5) + 
+geom_point( ) + geom_text((aes(label = id)), hjust = 1.5 ,check_overlap = TRUE)
 }

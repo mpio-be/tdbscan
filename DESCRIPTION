@@ -5,16 +5,16 @@ Authors@R:
     person("Mihai", "Valcu", ,"valcu@orn.mpg.de", c("aut", "cre"))
 Description: A dbscan implementation applied to tracks.
 Depends:
-    R (>= 3.5.0),
-    data.table,
-    trajectories,
-    magrittr
+    R (>= 3.5.0)
 Imports:
     dbscan,
     forcats,
     igraph,
     sp,
-    magrittr  
+    magrittr,
+    data.table,
+    broom,
+    trajectories 
 Suggests:
     ggplot2,
     roxygen2,
@@ -22,4 +22,4 @@ Suggests:
 License: GPL(>= 2)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
