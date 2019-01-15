@@ -42,24 +42,13 @@ geom_path(aes(color= NULL), col = 'grey', size = .5) +
 geom_point( alpha = .5, size = 2)
 
 
-
-
-
-# toybird 
-data(toybird)   
-z = tdbscan(toybird, eps = 500, minPts   = 3, maxLag = 6)
-
-o = cbind(sp::coordinates(toybird), z)[, clustID := factor(clustID)]
-
-ggplot(o, aes(coords.x1/100000,coords.x2/100000,color = clustID)) +
+# Set minTenure
+z = tdbscan(pesa56511, eps =6600, minPts   = 8, maxLag = 6, borderPoints = TRUE, minTenure= 24 )
+o = cbind(sp::coordinates(pesa56511), z)
+ggplot(o, aes(longitude/10000,latitude/10000,color = factor(clustID))) +
 geom_path(aes(color= NULL), col = 'grey', size = .5) + 
-geom_point( ) + geom_text((aes(label = id)), hjust = 1.5 ,check_overlap = TRUE)
+geom_point( alpha = .5, size = 2)
 
-# set min tenure
-z = tdbscan(toybird, eps = 500, minPts = 3, maxLag = 6, minTenure = 5)
-z[, .N, clustID]
-o = cbind(sp::coordinates(toybird), z)[, clustID := factor(clustID)]
-ggplot(o, aes(coords.x1/100000,coords.x2/100000,color = clustID)) +
-geom_path(aes(color= NULL), col = 'grey', size = .5) + 
-geom_point( ) + geom_text((aes(label = id)), hjust = 1.5 ,check_overlap = TRUE)
+
+
 }
