@@ -1,9 +1,9 @@
 # tdbscan
 A dbscan implementation applied to tracks.
-This is an alpha release: the software works as it should but it was not thoroughly tested.
+!!!This is an alpha release!!!
 
 ### TODO
- * Formally describe the method.
+ * Vignette to formally describe the method.
  * Add tests.
  * Add more examples.
 
