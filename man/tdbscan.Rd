@@ -30,7 +30,10 @@ When maxLag is set to \code{maxLag>N} output is the same as for \link[dbscan:dbs
 }
 \examples{
 require(tdbscan)
+require(data.table)
+require(magrittr)
 require(ggplot2)
+require(ggrepel)
 
 # Pectoral Sandpiper
 data(pesa56511)
@@ -49,6 +52,21 @@ ggplot(o, aes(longitude/10000,latitude/10000,color = factor(clustID))) +
 geom_path(aes(color= NULL), col = 'grey', size = .5) + 
 geom_point( alpha = .5, size = 2)
 
+# z bird
+data(zbird)
+z = tdbscan(zbird, eps =12, minPts   = 5, maxLag = 5, borderPoints = TRUE )
+z = z[, clustID := factor(clustID)]
 
+o = data.frame(zbird) \%>\% data.table
+o = merge(z, o, by.x = 'id', by.y = 'sp.ID')
 
+clustLab = o[!is.na(clustID), .(x = mean(x), y = mean(y), 
+	arrival = min(time), departure = max(time)  ), by = clustID]
+clustLab[, tenure := difftime(departure, arrival, units = 'hours')]
+clustLab[, lab := paste("ID: ", clustID, ",", tenure, "hours")]
+
+ggplot(o, aes(y,x, color = clustID ) )+
+ geom_path(aes(color= NULL), col = 'grey', size = .5) + 
+ geom_point( alpha = .5, size = 2) + 
+ geom_label_repel(data = clustLab, aes(y,x, label = lab), alpha = 0.7, size = 3)
 }

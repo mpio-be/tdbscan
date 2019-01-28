@@ -1,5 +1,11 @@
+
 ^.*\.Rproj$
 ^\.Rproj\.user$
-notes.R
+.travis.yml
+TODO.md
+README.md
+^\.travis\.yml$
+^README\.Rmd$
+^README-.*\.png$
 ^.*\.sublime-project
 ^.*\.sublime-workspace

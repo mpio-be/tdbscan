@@ -17,6 +17,7 @@ Imports:
     trajectories 
 Suggests:
     ggplot2,
+    ggrepel,
     roxygen2,
     testthat
 License: GPL(>= 2)
