@@ -2,11 +2,14 @@
     require(rgdal)
     require(sp)
     require(trajectories)
+    require(magrittr)
 
-    toybird = readOGR( "~/toybird.gpkg", 'toybird')   %>%
+    toybird = readOGR("x.geojson")   %>%
     spacetime::STIDF(time = seq(Sys.time(), by = 'hour', along.with = . ),
                      data = data.frame(ID = 1:length(.))) %>%
     trajectories::Track()
+
+    proj4string(toybird) = '+proj=aea +lat_1=43 +lat_2=62 +lat_0=30 +lon_0=10 +x_0=0 +y_0=0 +ellps=intl +units=m +no_defs'
 
     save(toybird, file = 'data/toybird.RData')
 
