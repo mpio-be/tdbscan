@@ -14,7 +14,8 @@ Imports:
     magrittr,
     data.table,
     broom,
-    trajectories 
+    trajectories,
+    spacetime
 Suggests:
     ggplot2,
     ggrepel,
