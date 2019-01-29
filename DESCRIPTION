@@ -1,6 +1,6 @@
 Package: tdbscan
 Title: Track dbscan
-Version: 0.0.1
+Version: 0.0.2
 Authors@R:
     person("Mihai", "Valcu", ,"valcu@orn.mpg.de", c("aut", "cre"))
 Description: A dbscan implementation applied to tracks.
