@@ -11,7 +11,7 @@
 #' @param projection   Projection of the data (should be equal area projection)
 #'
 # @import trajectories
-#' @importFrom data.table  data.table setnames .N := CJ setnames
+#' @importFrom data.table  data.table setnames .N := CJ setnames .SD .I
 #' @importFrom igraph      groups graph_from_edgelist  components
 #' @importFrom sf          st_area st_as_sf st_cast st_crs st_intersection st_set_crs st_union st_convex_hull st_geometry
 #'
@@ -37,7 +37,8 @@
 #' o[tagID == 'bird2', lon := lon + 5]
 #' o[!is.na(clustID), ID := paste0(tagID, '_', clustID)]
 #'
-#' z = stoscan(o, ID = 'ID', lat = 'lat', lon = 'lon', datetime_ = 'time', projection= '+proj=utm +zone=4 +datum=WGS84')
+#' z = stoscan(o, ID = 'ID', lat = 'lat', lon = 'lon', datetime_ = 'time',
+#'             projection= '+proj=utm +zone=4 +datum=WGS84')
 #' o = merge(o, z, by = 'ID', all.x = TRUE)
 #'
 #' # plot by tag ID
@@ -63,6 +64,10 @@
 
 stoscan = function(DT, ID, lat = 'lat', lon = 'lon', datetime_, projection){
 
+  arrival=arrival1=arrival2=departure=departure1=departure2=geom1=geom2=geometry=NULL
+  id1=id2=s_overlap=s_overlap_per=t_overlap=t_overlap_per=tenure1=tenure2=NULL
+  `.` = function(...) NULL
+
   if(missing(projection)) {
     projection= '+proj=utm +zone=4 +datum=WGS84'
     warning( paste('\nAssuming', projection) )
@@ -85,7 +90,7 @@ stoscan = function(DT, ID, lat = 'lat', lon = 'lon', datetime_, projection){
       st_geometry %>%
       st_cast('MULTIPOLYGON') %>%
       st_set_crs(st_crs(projection)) #%>%
-    #st_buffer(., dist = 3)  # potential to include buffer
+     #st_buffer(., dist = 3)  # potential to include buffer
 
   )  ,  by = .(ID) ]
 
