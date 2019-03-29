@@ -30,7 +30,6 @@ require(tdbscan)
 require(data.table)
 require(magrittr)
 require(ggplot2)
-require(ggrepel)
 
 # z bird
 data(zbird)
@@ -45,7 +44,7 @@ o = rbindlist(list(copy(o[, tagID := 'bird1']), copy(o[, tagID := 'bird2'])), us
 o[tagID == 'bird2', lon := lon + 5]
 o[!is.na(clustID), ID := paste0(tagID, '_', clustID)]
 
-z = stoscan(o, ID = 'ID', lat = 'lat', lon = 'lon', datetime_ = 'time')
+z = stoscan(o, ID = 'ID', lat = 'lat', lon = 'lon', datetime_ = 'time', projection= '+proj=utm +zone=4 +datum=WGS84')
 o = merge(o, z, by = 'ID', all.x = TRUE)
 
 # plot by tag ID

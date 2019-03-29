@@ -13,7 +13,7 @@
 # @import trajectories
 #' @importFrom data.table  data.table setnames .N := CJ setnames
 #' @importFrom igraph      groups graph_from_edgelist  components
-#' @importFrom sf          st_area st_as_sf st_cast st_crs st_intersection st_set_crs
+#' @importFrom sf          st_area st_as_sf st_cast st_crs st_intersection st_set_crs st_union st_convex_hull st_geometry
 #'
 #' @return                 Data.table with column s_clustID (unique spatially overlapping clusters) and st_clustID (unique spatio-temporal overlapping clusters)
 #' @export
@@ -23,7 +23,6 @@
 #' require(data.table)
 #' require(magrittr)
 #' require(ggplot2)
-#' require(ggrepel)
 #'
 #' # z bird
 #' data(zbird)
@@ -38,7 +37,7 @@
 #' o[tagID == 'bird2', lon := lon + 5]
 #' o[!is.na(clustID), ID := paste0(tagID, '_', clustID)]
 #'
-#' z = stoscan(o, ID = 'ID', lat = 'lat', lon = 'lon', datetime_ = 'time')
+#' z = stoscan(o, ID = 'ID', lat = 'lat', lon = 'lon', datetime_ = 'time', projection= '+proj=utm +zone=4 +datum=WGS84')
 #' o = merge(o, z, by = 'ID', all.x = TRUE)
 #'
 #' # plot by tag ID
