@@ -11,6 +11,7 @@ Imports:
     forcats,
     igraph,
     sp,
+    sf,
     magrittr,
     data.table,
     broom,
