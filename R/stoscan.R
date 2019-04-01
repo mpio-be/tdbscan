@@ -88,7 +88,7 @@ stoscan = function(DT, ID, lat = 'lat', lon = 'lon', datetime_, projection){
       st_union %>%
       st_convex_hull %>%
       st_geometry %>%
-      st_cast('MULTIPOLYGON') %>%
+      st_cast('POLYGON') %>%
       st_set_crs(st_crs(projection)) #%>%
      #st_buffer(., dist = 3)  # potential to include buffer
 

@@ -12,3 +12,10 @@ A dbscan implementation applied to tracks.
  * Add tests.
  * Add more examples.
 
+### Installation
+
+```R
+install.packages('devtools')
+devtools::install_github('mpio-be/tdbscan')
+
+```
