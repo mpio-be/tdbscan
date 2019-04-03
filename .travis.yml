@@ -7,6 +7,10 @@ warnings_are_errors: true
 before install:
  - sudo apt update
  - sudo apt install libudunits2-dev
+addons:
+  apt:
+    packages:
+ - libudunits2-dev
 
 r_packages:
  - dbscan
