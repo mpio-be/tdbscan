@@ -1,141 +1,92 @@
 
-#' stoscan
+#' Spatio-temporal clustering from tdbscan outpout manipulated by dt2Convexhull
 #'
-#' Spatio-temporal clustering from tdbscan outpout
+#' @param d         a data.frame including points which belong to clusters (tdbscan output), latitude, longitude and datetime
+#' @param pid       ID unique for points that belong to one cluster
+#' @param arrival   arrival datetime in polygon
+#' @param departure departure time from polygon
+#' @param geometry  convex hull of points of a unique cluster
 #'
-#' @param DT           A data.table including columns for ID, lat, lon and datetime_
-#' @param ID           Unique ID for each cluster of each individual
-#' @param lat          Latitude
-#' @param lon          Longitude
-#' @param datetime_    Date and time
-#' @param projection   Projection of the data (should be equal area projection)
-#'
-# @import trajectories
-#' @importFrom data.table  data.table setnames .N := CJ setnames .SD .I
-#' @importFrom igraph      groups graph_from_edgelist  components
-#' @importFrom sf          st_area st_as_sf st_cast st_crs st_intersection st_set_crs st_union st_convex_hull st_geometry
-#'
-#' @return                 Data.table with column s_clustID (unique spatially overlapping clusters) and st_clustID (unique spatio-temporal overlapping clusters)
+#' @return data.table including pid, s_clustID = ID unique for spatial overlapping clusters,
+#'         st_clustID = ID unique for spatial temporal overlapping clusters
 #' @export
 #'
+#' @importFrom data.table  data.table as.data.table setnames .N := .SD .I
+#' @importFrom igraph      groups graph_from_edgelist  components
+#' @importFrom sf          st_as_sf st_intersects
+#'
 #' @examples
-#' require(tdbscan)
 #' require(data.table)
-#' require(magrittr)
 #' require(ggplot2)
 #'
-#' # z bird
 #' data(zbird)
 #' z = tdbscan(zbird, eps = 12, minPts   = 5, maxLag = 5, borderPoints = TRUE )
 #' z = z[, clustID := factor(clustID)]
 #'
-#' o = data.frame(zbird) %>% data.table
-#' o = merge(z, o, by.x = 'id', by.y = 'sp.ID')
+#' d = data.frame(zbird) %>% data.table
+#' d = merge(z, d, by.x = 'id', by.y = 'sp.ID')
 #'
-#' setnames(o, c('x', 'y'), c('lon', 'lat') )
-#' o = rbindlist(list(copy(o[, tagID := 'bird1']), copy(o[, tagID := 'bird2'])), use.names = TRUE)
-#' o[tagID == 'bird2', lon := lon + 5]
-#' o[!is.na(clustID), ID := paste0(tagID, '_', clustID)]
+#' d = rbindlist(list(copy(d[, tagID := 'bird1']), copy(d[, tagID := 'bird2'])), use.names = TRUE)
+#' d[tagID == 'bird2', x := x + 5]
+#' d[tagID == 'bird2', x := x + 5]
+#' d[!is.na(clustID), ID := paste0(tagID, '_', clustID)]
 #'
-#' z = stoscan(o, ID = 'ID', lat = 'lat', lon = 'lon', datetime_ = 'time',
-#'             projection= '+proj=utm +zone=4 +datum=WGS84')
-#' o = merge(o, z, by = 'ID', all.x = TRUE)
+#' dp = dt2Convexhull(d, pid = 'ID', projection = '+proj=utm +zone=4 +datum=WGS84')
 #'
-#' # plot by tag ID
-#' ggplot(o, aes(lon, lat, color = as.character(tagID) ) ) +
-#'   geom_path(aes(color = NULL), col = 'grey', size = .5) +
-#'   geom_point( alpha = .5, size = 2)
-#'
-#' # plot by cluster ID of each individual
-#' ggplot(o, aes(lon, lat, color = as.character(ID) ) ) +
-#'   geom_path(aes(color = NULL), col = 'grey', size = .5) +
-#'   geom_point( alpha = .5, size = 2)
+#' s = stoscan(dp)
+#' d = merge(d, s, by.x = 'ID', by.y = 'pid', all.x = TRUE)
 #'
 #' # plot of spatial overlapping clusters
-#' ggplot(o, aes(lon, lat, color = as.character(sp_clustID) ) ) +
+#' ggplot(d, aes(x, y, color = as.character(s_clustID) ) ) +
 #'   geom_path(aes(color = NULL), col = 'grey', size = .5) +
 #'   geom_point( alpha = .5, size = 2)
 #'
 #' # plot of spatial and temporal overlapping clusters
-#' ggplot(o, aes(lon, lat, color = as.character(s_clustID) ) ) +
+#' ggplot(d, aes(x, y, color = as.character(st_clustID) ) ) +
 #'   geom_path(aes(color = NULL), col = 'grey', size = .5) +
 #'   geom_point( alpha = .5, size = 2)
+#'
+stoscan = function(d, pid = 'pid', arrival = 'arrival', departure = 'departure', geometry = 'geometry'){
 
-
-stoscan = function(DT, ID, lat = 'lat', lon = 'lon', datetime_, projection){
-
-  arrival=arrival1=arrival2=departure=departure1=departure2=geom1=geom2=geometry=NULL
-  id1=id2=s_overlap=s_overlap_per=t_overlap=t_overlap_per=tenure1=tenure2=NULL
+  ID1=ID2=arrival1=arrival2=departure1=departure2=geom1=geom2=rowID=row.id=col.id=t_overlap=NULL
   `.` = function(...) NULL
 
-  if(missing(projection)) {
-    projection= '+proj=utm +zone=4 +datum=WGS84'
-    warning( paste('\nAssuming', projection) )
-  }
+  d = data.table(d)
+  setnames(d, c(pid, arrival, departure, geometry), c('pid', 'arrival', 'departure', 'geometry'))
 
-  setnames(DT, c(ID, lat, lon, datetime_), c('ID', 'lat', 'lon', 'datetime_'))
-
-  # file with all convex hull polygons
-  d = DT[!is.na(ID),  .(
-
-    arrival = min(datetime_, na.rm = TRUE),
-    departure = max(datetime_, na.rm = TRUE),
-    tenure = difftime(max(datetime_, na.rm = TRUE), min(datetime_, na.rm = TRUE), units = 'mins') %>%
-      as.numeric,
-
-    geometry =
-      st_as_sf(.SD, coords = c('lon', 'lat')) %>%
-      st_union %>%
-      st_convex_hull %>%
-      st_geometry %>%
-      st_cast('POLYGON') %>%
-      st_set_crs(st_crs(projection)) #%>%
-     #st_buffer(., dist = 3)  # potential to include buffer
-
-  )  ,  by = .(ID) ]
-
-  setnames(DT, c('ID', 'lat', 'lon', 'datetime_'), c(ID, lat, lon, datetime_))
-
-  # create table with all combinations
-  id = d$ID %>% unique
-  x = CJ(id1 = id, id2 = id)
+  # check which polygons overlap in space
+  o = st_as_sf(d) %>% st_intersects %>% as.data.table
 
   # subset unique combinations
-  x = x[x[, .I[1], by = list(pmin(id1, id2), pmax(id1, id2))]$V1]
-  x = x[id1 != id2]
+  o = o[row.id != col.id]
+  o = o[o[, .I[1], by = list(pmin(row.id, col.id), pmax(row.id, col.id))]$V1]
 
-  # merge info to id
-  x = merge(x, d[, .(id, geom1 = geometry, arrival1 = arrival, departure1 = departure, tenure1 = tenure)], by.x = 'id1', by.y = 'id')
-  x = merge(x, d[, .(id, geom2 = geometry, arrival2 = arrival, departure2 = departure, tenure2 = tenure)], by.x = 'id2', by.y = 'id')
+  # merge with polygon ids
+  d[, rowID := 1:nrow(d)]
+  o = merge(o, d[, .(rowID, ID1 = pid, arrival1 = arrival, departure1 = departure)], by.x = 'row.id', by.y = 'rowID', all.x = TRUE)
+  o = merge(o, d[, .(rowID, ID2 = pid, arrival2 = arrival, departure2 = departure)], by.x = 'col.id', by.y = 'rowID', all.x = TRUE)
 
-  # calculate spatial overlap
-  x[, s_overlap := st_intersection(geom1, geom2) %>% st_area(), by = 1:nrow(x)]
-  x[, s_overlap_per := st_intersection(geom1, geom2) %>% st_area() * 100 /sqrt( st_area(geom1) * st_area(geom2) ), by = 1:nrow(x)]
-
-  # calculate temporal overlap
-  x[, t_overlap := difftime(min(departure1, departure2), max(arrival1, arrival2), units = 'mins') %>% as.numeric, by = 1:nrow(x)]
-  x[t_overlap <= 0, t_overlap := NA]
-  x[, t_overlap_per := if(!is.na(t_overlap)) t_overlap * 100 / sqrt(tenure1 * tenure2), by = 1:nrow(x)]
+  # check which polygons overlap in space
+  o[, t_overlap := ifelse(c(difftime(min(departure1, departure2),
+                                     max(arrival1, arrival2), units = 'mins') %>% as.numeric) > 0, TRUE, FALSE), by = 1:nrow(o)]
 
   # find spatial clusters
-  xs = x[!is.na(s_overlap)]
-
-  g = graph_from_edgelist( xs[, .(id1, id2)] %>% as.matrix, directed = FALSE)
+  g = graph_from_edgelist( o[, .(ID1, ID2)] %>% as.matrix, directed = FALSE)
   gr = components(g) %>% groups
 
-  ids = sapply(gr, length); ids = rep(names(ids), times = ids)%>% as.integer
-  os = data.table(ID = unlist(gr), s_clustID = ids)
+  ids = sapply(gr, length); ids = rep(names(ids), times = ids) %>% as.integer
+  os = data.table(pid = unlist(gr), s_clustID = ids)
 
   # find spatio-temporal clusters
-  xt = x[!is.na(s_overlap) & !is.na(t_overlap)]
-
-  g = graph_from_edgelist( xt[, .(id1, id2)] %>% as.matrix, directed = FALSE)
+  g = graph_from_edgelist( o[t_overlap == TRUE, .(ID1, ID2)] %>% as.matrix, directed = FALSE)
   gr = components(g) %>% groups
 
-  ids = sapply(gr, length); ids = rep(names(ids), times = ids)%>% as.integer
-  osp = data.table(ID = unlist(gr), sp_clustID = ids)
+  ids = sapply(gr, length); ids = rep(names(ids), times = ids) %>% as.integer
+  osp = data.table(pid = unlist(gr), st_clustID = ids)
 
-  o = merge(os, osp, by = 'ID')
+  o = merge(os, osp, by = 'pid', all.x = TRUE)
+
+  setnames(d, c('pid', 'arrival', 'departure', 'geometry'), c(pid, arrival, departure, geometry))
   o
 
 }

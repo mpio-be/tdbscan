@@ -2,69 +2,58 @@
 % Please edit documentation in R/stoscan.R
 \name{stoscan}
 \alias{stoscan}
-\title{stoscan}
+\title{Spatio-temporal clustering from tdbscan outpout manipulated by dt2Convexhull}
 \usage{
-stoscan(DT, ID, lat = "lat", lon = "lon", datetime_, projection)
+stoscan(d, pid = "pid", arrival = "arrival", departure = "departure",
+  geometry = "geometry")
 }
 \arguments{
-\item{DT}{A data.table including columns for ID, lat, lon and datetime_}
+\item{d}{a data.frame including points which belong to clusters (tdbscan output), latitude, longitude and datetime}
 
-\item{ID}{Unique ID for each cluster of each individual}
+\item{pid}{ID unique for points that belong to one cluster}
 
-\item{lat}{Latitude}
+\item{arrival}{arrival datetime in polygon}
 
-\item{lon}{Longitude}
+\item{departure}{departure time from polygon}
 
-\item{datetime_}{Date and time}
-
-\item{projection}{Projection of the data (should be equal area projection)}
+\item{geometry}{convex hull of points of a unique cluster}
 }
 \value{
-Data.table with column s_clustID (unique spatially overlapping clusters) and st_clustID (unique spatio-temporal overlapping clusters)
+data.table including pid, s_clustID = ID unique for spatial overlapping clusters,
+        st_clustID = ID unique for spatial temporal overlapping clusters
 }
 \description{
-Spatio-temporal clustering from tdbscan outpout
+Spatio-temporal clustering from tdbscan outpout manipulated by dt2Convexhull
 }
 \examples{
-require(tdbscan)
 require(data.table)
-require(magrittr)
 require(ggplot2)
 
-# z bird
 data(zbird)
 z = tdbscan(zbird, eps = 12, minPts   = 5, maxLag = 5, borderPoints = TRUE )
 z = z[, clustID := factor(clustID)]
 
-o = data.frame(zbird) \%>\% data.table
-o = merge(z, o, by.x = 'id', by.y = 'sp.ID')
+d = data.frame(zbird) \%>\% data.table
+d = merge(z, d, by.x = 'id', by.y = 'sp.ID')
 
-setnames(o, c('x', 'y'), c('lon', 'lat') )
-o = rbindlist(list(copy(o[, tagID := 'bird1']), copy(o[, tagID := 'bird2'])), use.names = TRUE)
-o[tagID == 'bird2', lon := lon + 5]
-o[!is.na(clustID), ID := paste0(tagID, '_', clustID)]
+d = rbindlist(list(copy(d[, tagID := 'bird1']), copy(d[, tagID := 'bird2'])), use.names = TRUE)
+d[tagID == 'bird2', x := x + 5]
+d[tagID == 'bird2', x := x + 5]
+d[!is.na(clustID), ID := paste0(tagID, '_', clustID)]
 
-z = stoscan(o, ID = 'ID', lat = 'lat', lon = 'lon', datetime_ = 'time',
-            projection= '+proj=utm +zone=4 +datum=WGS84')
-o = merge(o, z, by = 'ID', all.x = TRUE)
+dp = dt2Convexhull(d, pid = 'ID', projection = '+proj=utm +zone=4 +datum=WGS84')
 
-# plot by tag ID
-ggplot(o, aes(lon, lat, color = as.character(tagID) ) ) +
-  geom_path(aes(color = NULL), col = 'grey', size = .5) +
-  geom_point( alpha = .5, size = 2)
-
-# plot by cluster ID of each individual
-ggplot(o, aes(lon, lat, color = as.character(ID) ) ) +
-  geom_path(aes(color = NULL), col = 'grey', size = .5) +
-  geom_point( alpha = .5, size = 2)
+s = stoscan(dp)
+d = merge(d, s, by.x = 'ID', by.y = 'pid', all.x = TRUE)
 
 # plot of spatial overlapping clusters
-ggplot(o, aes(lon, lat, color = as.character(sp_clustID) ) ) +
+ggplot(d, aes(x, y, color = as.character(s_clustID) ) ) +
   geom_path(aes(color = NULL), col = 'grey', size = .5) +
   geom_point( alpha = .5, size = 2)
 
 # plot of spatial and temporal overlapping clusters
-ggplot(o, aes(lon, lat, color = as.character(s_clustID) ) ) +
+ggplot(d, aes(x, y, color = as.character(st_clustID) ) ) +
   geom_path(aes(color = NULL), col = 'grey', size = .5) +
   geom_point( alpha = .5, size = 2)
+
 }

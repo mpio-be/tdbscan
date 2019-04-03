@@ -1,30 +1,29 @@
 context('stoscan')
 
-require(tdbscan)
 require(data.table)
-require(magrittr)
+require(ggplot2)
 
-# z bird
 data(zbird)
-z = tdbscan(zbird, eps = 12, minPts = 5, maxLag = 5, borderPoints = TRUE )
+z = tdbscan(zbird, eps = 12, minPts   = 5, maxLag = 5, borderPoints = TRUE )
 z = z[, clustID := factor(clustID)]
 
-o = data.frame(zbird) %>% data.table
-o = merge(z, o, by.x = 'id', by.y = 'sp.ID')
+d = data.frame(zbird) %>% data.table
+d = merge(z, d, by.x = 'id', by.y = 'sp.ID')
 
-setnames(o, c('x', 'y'), c('lon', 'lat') )
-o = rbindlist(list(copy(o[, tagID := 'bird1']), copy(o[, tagID := 'bird2'])), use.names = TRUE)
-o[tagID == 'bird2', lon := lon + 5]
-o[!is.na(clustID), ID := paste0(tagID, '_', clustID)]
+d = rbindlist(list(copy(d[, tagID := 'bird1']), copy(d[, tagID := 'bird2'])), use.names = TRUE)
+d[tagID == 'bird2', x := x + 5]
+d[tagID == 'bird2', x := x + 5]
+d[!is.na(clustID), ID := paste0(tagID, '_', clustID)]
 
-z = stoscan(o, ID = 'ID', lat = 'lat', lon = 'lon', datetime_ = 'time',
-            projection= '+proj=utm +zone=4 +datum=WGS84')
+dp = dt2Convexhull(d, pid = 'ID', projection = '+proj=utm +zone=4 +datum=WGS84')
+
+s = stoscan(dp)
 
 
 # full function is working
 test_that('stoscan is list', {
 
-  expect_type( z,  'list' )
+  expect_type( s,  'list' )
 
 })
 
