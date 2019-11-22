@@ -73,7 +73,7 @@ dt2Track <- function(d, y = 'latitude', x = 'longitude', dt = 'time', projection
 #'
 dt2Convexhull = function(d, pid, y = 'y', x = 'x', dt = 'time', projection){
 
-  arrival=departure=geometry=NULL
+  arrival=departure=geometry=dup=NULL
   `.` = function(...) NULL
 
   if(missing(projection)) {
@@ -84,6 +84,12 @@ dt2Convexhull = function(d, pid, y = 'y', x = 'x', dt = 'time', projection){
   d = data.table(d)
 
   setnames(d, c(pid, y, x, dt), c('pid', 'y', 'x', 'dt'))
+
+  # jitter overlapping points to still get a polygon if points overlap
+  d[, dup := duplicated(d, by = c('pid', 'y', 'x'))]
+  d[dup == TRUE, y := jitter(y, factor = 0.0000000001)]
+  d[dup == TRUE, x := jitter(x, factor = 0.0000000001)]
+  d[, dup := NULL]
 
   # file with all convex hull polygons for each cluster of points
   o = d[!is.na(pid),  .(
