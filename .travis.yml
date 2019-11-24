@@ -4,29 +4,14 @@ language: R
 sudo: required
 warnings_are_errors: true
 
-before install:
- - sudo apt update
- - sudo apt install libudunits2-dev
+before_install:
+  - sudo apt-get install -y libproj-dev libgeos-dev gdal-bin libgdal-dev libgit2-dev
 
 addons:
   apt:
     packages:
       - libudunits2-dev
 
-r_packages:
- - dbscan
- - forcats
- - igraph
- - sp
- - units
- - sf
- - magrittr
- - data.table
- - broom
- - trajectories
- - ggplot2
- - roxygen2
- - testthat
 
 after_success:
  - Rscript -e 'devtools::install();devtools::test()'
