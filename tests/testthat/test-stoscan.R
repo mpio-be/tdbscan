@@ -1,9 +1,8 @@
 context('stoscan')
 
-require(data.table)
-require(ggplot2)
 
-data(zbird)
+require(data.table)
+
 z = tdbscan(zbird, eps = 12, minPts   = 5, maxLag = 5, borderPoints = TRUE )
 z = z[, clustID := factor(clustID)]
 
