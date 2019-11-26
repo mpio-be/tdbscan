@@ -1,8 +1,9 @@
 Package: tdbscan
 Title: Track dbscan
 Version: 0.0.2
-Authors@R:
-    person("Mihai", "Valcu", ,"valcu@orn.mpg.de", c("aut", "cre"))
+Authors@R:c( 
+           person("Mihai", "Valcu",       email = "valcu@orn.mpg.de",     role = c("aut", "cre")),
+           person("Johannes", "Krietsch", email = "jkrietsch@orn.mpg.de", role = "ctb") )
 Description: A dbscan implementation applied to tracks.
 Depends:
     R (>= 3.5.0)
