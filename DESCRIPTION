@@ -1,10 +1,10 @@
 Package: tdbscan
-Title: Track dbscan
+Title: tdbscan, a dbscan implementation applied to animal tracks.
 Version: 0.0.2
-Authors@R:c( 
+Authors@R: c( 
            person("Mihai", "Valcu",       email = "valcu@orn.mpg.de",     role = c("aut", "cre")),
            person("Johannes", "Krietsch", email = "jkrietsch@orn.mpg.de", role = "ctb") )
-Description: A dbscan implementation applied to tracks.
+Description: tdbscan (track-dbscan) implementation applied to animal tracks.
 Depends:
     R (>= 3.5.0)
 Imports:
@@ -27,4 +27,4 @@ Suggests:
 License: GPL(>= 2)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1.9000
+RoxygenNote: 7.0.2

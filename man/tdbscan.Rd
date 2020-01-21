@@ -4,8 +4,7 @@
 \alias{tdbscan}
 \title{tdbscan}
 \usage{
-tdbscan(track, eps, minPts = 5, borderPoints = FALSE, maxLag = 6,
-  minTenure)
+tdbscan(track, eps, minPts = 5, borderPoints = FALSE, maxLag = 6, minTenure)
 }
 \arguments{
 \item{track}{A \link[sp:is.projected]{projected}  \link[trajectories:Track]{Track}.}

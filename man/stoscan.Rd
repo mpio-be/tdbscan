@@ -4,8 +4,13 @@
 \alias{stoscan}
 \title{Spatio-temporal clustering from tdbscan outpout manipulated by dt2Convexhull}
 \usage{
-stoscan(d, pid = "pid", arrival = "arrival", departure = "departure",
-  geometry = "geometry")
+stoscan(
+  d,
+  pid = "pid",
+  arrival = "arrival",
+  departure = "departure",
+  geometry = "geometry"
+)
 }
 \arguments{
 \item{d}{a data.frame including points which belong to clusters (tdbscan output), latitude, longitude and datetime}
