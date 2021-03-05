@@ -55,7 +55,7 @@ stoscan = function(d, pid = 'pid', arrival = 'arrival', departure = 'departure',
   setnames(d, c(pid, arrival, departure, geometry), c('pid', 'arrival', 'departure', 'geometry'))
 
   # check which polygons overlap in space
-  o = st_as_sf(d) %>% st_intersects %>% as.data.table
+  o = st_as_sf(d) %>% st_intersects %>% as.data.frame %>% as.data.table
 
   # subset unique combinations
   o = o[row.id != col.id]
